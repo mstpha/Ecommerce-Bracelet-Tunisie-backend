@@ -31,8 +31,13 @@ router.post('/', async (req, res) => {
     const user = await userService.createUser(req.body);
     res.status(201).json({ success: true, data: user });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
-  }
+    console.error('❌ Full error object:', error); // ADD THIS
+    console.error('❌ Error message:', error.message); // ADD THIS
+    console.error('❌ Error stack:', error.stack); // ADD THIS
+    res.status(400).json({ 
+      success: false, 
+      message: error.message || error.toString() || 'Unknown error occurred'
+    });  }
 });
 
 // Update user
