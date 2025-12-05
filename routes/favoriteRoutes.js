@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const favoriteService = require('../services/favoriteService');
+const { authenticate, authorizeUser } = require('../middleware/auth');
 
 // Get user's favorites
-router.get('/:userId', async (req, res) => {
+router.get('/:userId',authenticate,authorizeUser, async (req, res) => {
   try {
     const favorites = await favoriteService.getUserFavorites(req.params.userId);
     res.json({ success: true, data: favorites });
@@ -13,7 +14,7 @@ router.get('/:userId', async (req, res) => {
 });
 
 // Add to favorites
-router.post('/:userId', async (req, res) => {
+router.post('/:userId',authenticate,authorizeUser, async (req, res) => {
   try {
     const { product } = req.body;
     const favorite = await favoriteService.addToFavorites(req.params.userId, product);
@@ -24,7 +25,7 @@ router.post('/:userId', async (req, res) => {
 });
 
 // Remove from favorites
-router.delete('/:userId/:productId', async (req, res) => {
+router.delete('/:userId/:productId',authenticate,authorizeUser, async (req, res) => {
   try {
     await favoriteService.removeFromFavorites(req.params.userId, req.params.productId);
     res.json({ success: true, message: 'Removed from favorites' });

@@ -1,6 +1,7 @@
 const pool = require('../config/database');
 const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
+const { generateToken } = require('../middleware/auth');
 
 class UserService {
   async getAllUsers() {
@@ -40,7 +41,13 @@ class UserService {
       [userId, userData.full_name, userData.email, hashedPassword, userData.phone || '', userData.address || '']
     );
 
-    return result.rows[0];
+    const user = result.rows[0];
+    const token = generateToken(user);
+
+    return {
+      user,
+      token
+    };
   }
 
   async updateUser(userId, updates) {
@@ -48,7 +55,7 @@ class UserService {
     if (!user) {
       throw new Error('User not found');
     }
-
+    
     if (updates.email && updates.email !== user.email) {
       const emailExists = await this.getUserByEmail(updates.email);
       if (emailExists) {
@@ -120,9 +127,13 @@ class UserService {
     if (!isValidPassword) {
       throw new Error('Invalid email or password');
     }
-
     const { password: _, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    const token = generateToken(userWithoutPassword);
+
+    return {
+      user: userWithoutPassword,
+      token
+    };
   }
 }
 

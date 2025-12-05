@@ -1,9 +1,40 @@
 const express = require('express');
 const router = express.Router();
 const userService = require('../services/userService');
+const { authenticate, authorizeUser } = require('../middleware/auth');
 
-// Get all users
-router.get('/', async (req, res) => {
+// Public routes (no authentication needed)
+
+// Register new user - returns token
+router.post('/', async (req, res) => {
+  try {
+    const result = await userService.createUser(req.body);
+    res.status(201).json({ success: true, data: result });
+  } catch (error) {
+    console.error('❌ Full error object:', error);
+    console.error('❌ Error message:', error.message);
+    console.error('❌ Error stack:', error.stack);
+    res.status(400).json({ 
+      success: false, 
+      message: error.message || error.toString() || 'Unknown error occurred'
+    });
+  }
+});
+
+// Login - returns token
+router.post('/login', async (req, res) => {
+  try {
+    const result = await userService.loginUser(req.body.email, req.body.password);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(401).json({ success: false, message: error.message });
+  }
+});
+
+// Protected routes (authentication required)
+
+// Get all users - admin only (you might want to add role-based auth later)
+router.get('/', authenticate, async (req, res) => {
   try {
     const users = await userService.getAllUsers();
     res.json({ success: true, data: users });
@@ -12,8 +43,8 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get user by ID
-router.get('/:id', async (req, res) => {
+// Get user by ID - user can only get their own data
+router.get('/:id', authenticate, authorizeUser, async (req, res) => {
   try {
     const user = await userService.getUserById(req.params.id);
     if (!user) {
@@ -25,23 +56,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Create user
-router.post('/', async (req, res) => {
-  try {
-    const user = await userService.createUser(req.body);
-    res.status(201).json({ success: true, data: user });
-  } catch (error) {
-    console.error('❌ Full error object:', error); // ADD THIS
-    console.error('❌ Error message:', error.message); // ADD THIS
-    console.error('❌ Error stack:', error.stack); // ADD THIS
-    res.status(400).json({ 
-      success: false, 
-      message: error.message || error.toString() || 'Unknown error occurred'
-    });  }
-});
-
-// Update user
-router.put('/:id', async (req, res) => {
+// Update user - user can only update their own data
+router.put('/:id', authenticate, authorizeUser, async (req, res) => {
   try {
     const user = await userService.updateUser(req.params.id, req.body);
     res.json({ success: true, data: user });
@@ -50,23 +66,13 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Delete user
-router.delete('/:id', async (req, res) => {
+// Delete user - user can only delete their own account
+router.delete('/:id', authenticate, authorizeUser, async (req, res) => {
   try {
     await userService.deleteUser(req.params.id);
     res.json({ success: true, message: 'User deleted successfully' });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
-  }
-});
-
-// Login
-router.post('/login', async (req, res) => {
-  try {
-    const user = await userService.loginUser(req.body.email, req.body.password);
-    res.json({ success: true, data: user });
-  } catch (error) {
-    res.status(401).json({ success: false, message: error.message });
   }
 });
 

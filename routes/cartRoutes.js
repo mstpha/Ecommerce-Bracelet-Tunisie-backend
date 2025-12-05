@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const cartService = require('../services/cartService');
+const { authenticate, authorizeUser } = require('../middleware/auth');
 
 // Get user's cart
-router.get('/:userId', async (req, res) => {
+router.get('/:userId',authenticate,authorizeUser, async (req, res) => {
   try {
     const cartItems = await cartService.getUserCart(req.params.userId);
     res.json({ success: true, data: cartItems });
@@ -13,7 +14,7 @@ router.get('/:userId', async (req, res) => {
 });
 
 // Add to cart
-router.post('/:userId', async (req, res) => {
+router.post('/:userId',authenticate,authorizeUser, async (req, res) => {
   try {
     const { product, quantity } = req.body;
     const cartItem = await cartService.addToCart(req.params.userId, product, quantity);
@@ -24,7 +25,7 @@ router.post('/:userId', async (req, res) => {
 });
 
 // Update cart item
-router.put('/:userId/:productId', async (req, res) => {
+router.put('/:userId/:productId',authenticate,authorizeUser, async (req, res) => {
   try {
     const { quantity } = req.body;
     const cartItem = await cartService.updateCartItem(req.params.userId, req.params.productId, quantity);
@@ -35,7 +36,7 @@ router.put('/:userId/:productId', async (req, res) => {
 });
 
 // Remove from cart
-router.delete('/:userId/:productId', async (req, res) => {
+router.delete('/:userId/:productId', authenticate,authorizeUser,async (req, res) => {
   try {
     await cartService.removeFromCart(req.params.userId, req.params.productId);
     res.json({ success: true, message: 'Item removed from cart' });
@@ -45,7 +46,7 @@ router.delete('/:userId/:productId', async (req, res) => {
 });
 
 // Clear cart
-router.delete('/:userId', async (req, res) => {
+router.delete('/:userId',authenticate,authorizeUser, async (req, res) => {
   try {
     await cartService.clearCart(req.params.userId);
     res.json({ success: true, message: 'Cart cleared successfully' });

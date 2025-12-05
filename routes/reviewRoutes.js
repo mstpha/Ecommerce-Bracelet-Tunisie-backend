@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const reviewService = require('../services/reviewService');
+const { authenticate, authorizeUser } = require('../middleware/auth');
 
 // Get product reviews
 router.get('/:productId', async (req, res) => {
@@ -13,7 +14,7 @@ router.get('/:productId', async (req, res) => {
 });
 
 // Add review
-router.post('/:productId', async (req, res) => {
+router.post('/:productId',authenticate, async (req, res) => {
   try {
     const { userName, reviewMessage } = req.body;
     const review = await reviewService.addReview(req.params.productId, userName, reviewMessage);
