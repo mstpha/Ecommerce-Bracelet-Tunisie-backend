@@ -41,7 +41,7 @@ class OrderService {
           [
             userId,
             item.productId || item.id,
-            item.name,
+            item.product_name || item.name, 
             item.quantity,
             item.price,
             item.price * item.quantity,
