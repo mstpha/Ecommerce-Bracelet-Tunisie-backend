@@ -31,7 +31,7 @@ class OrderService {
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
-
+      console.log(cartItems)
       const orders = [];
       for (const item of cartItems) {
         const result = await client.query(
@@ -41,7 +41,7 @@ class OrderService {
           [
             userId,
             item.productId || item.id,
-            item.product_name || item.name, 
+            item.product_name? item.product_name: item.name, 
             item.quantity,
             item.price,
             item.price * item.quantity,
