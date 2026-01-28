@@ -8,6 +8,7 @@ const orderRoutes = require('./routes/orderRoutes');
 const favoriteRoutes = require('./routes/favoriteRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const productRoutes = require('./routes/productRoutes')
+const imageRoutes = require('./routes/imageRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -26,6 +27,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/favorites', favoriteRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/images', imageRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
